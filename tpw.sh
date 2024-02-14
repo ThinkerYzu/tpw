@@ -119,7 +119,7 @@ $0: (list|ver|ex-cover|....)
     diff        compare the current patchset with the previous one.
     init	initialize the current working directory with a patch-dir.
     fix		fix a patch with the changes in the working directory.
-    lsfix	list commits in the working directory.
+    lsfix|ls	list commits in the working directory.
 EOF
 }
 
@@ -309,7 +309,7 @@ case "$COMMAND" in
         fixup-cont.sh || exit 1
         tpw.sh update
         ;;
-    lsfix)
+    lsfix|ls)
 	git log --oneline "@{upstream}.."|tac|cat -n|tac
 	;;
     *)
