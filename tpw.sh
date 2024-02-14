@@ -116,6 +116,7 @@ $0: (list|ver|ex-cover|....)
     rcvrs	show receivers of the patchset.
     path	show the path of the current version of the patchset.
     addword	add a new word to the dictionary.
+    diff        compare the current patchset with the previous one.
     init	initialize the current working directory with a patch-dir.
     fix		fix a patch with the changes in the working directory.
     lsfix	list commits in the working directory.
@@ -294,6 +295,9 @@ case "$COMMAND" in
 	cat "${PWS}.bak"|grep -v personal_ws|sort -f|uniq >> "$PWS"
 	echo "DONE"
 	;;
+    diff)
+        diff-patchset.sh
+        ;;
     init)
 	init_patch_dir $2
 	;;
