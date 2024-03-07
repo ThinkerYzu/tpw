@@ -108,6 +108,7 @@ $0: (list|ver|ex-cover|....)
     update-rfc	update the current version of the patchset.
     update-rfc-nocover	update the current version of the patchset.
     swproj	switch to a project.
+    checkout    checkout the branch of the current project.
     stick-branch   stick this project to the current GIT branch.
     mkbranch    create a new branch and project and switch to it.
     adv		advance to the next/new version of the patchset.
@@ -210,6 +211,11 @@ case "$COMMAND" in
         fi
         visit $2
 	;;
+    checkout)
+        BRANCH="$(cat $PROJ_DIR/.tpw-branch)"
+        echo "Checkout $BRANCH"
+        git checkout "$BRANCH"
+        ;;
     stick-branch)
         BR=$(git branch --show-current)
         if [ -n "$BR" ]; then
@@ -234,6 +240,7 @@ case "$COMMAND" in
         git branch --set-upstream-to="$UPSTREAM"
         echo "$BR" > "$ORIGIN_DIR/.tpw-current"
         echo "$BR" > "$NEXT_BRANCH"
+        visit "$BR"
         ;;
     adv)
 	NEW_VER=$(new_version)
