@@ -86,6 +86,32 @@ function list_projects () {
     done
 }
 
+function replace_pattern () {
+    W1="$1"
+    W2="$2"
+    UPSTREAM=$(git log -n 1  --pretty="%H" "@{upstream}")
+    if [ -z $UPSTREAM ]; then
+        echo "No upstream branch found"
+        exit 1
+    fi
+
+    echo "Replace $W1 with $W2 in all patches from $CURRENT_PATCH_DIR"
+    FILES=$(ls $CURRENT_PATCH_DIR/*.patch|grep -v 0000-|sort)
+    for f in $FILES; do
+        sed "/^---\$/,\$s/$W1/$W2/" $f > $f.tmp
+        mv $f.tmp $f
+    done
+
+    echo "Apply modified patches to $UPSTREAM"
+    git checkout -q $UPSTREAM
+    git am $FILES
+    NEW_COMMIT=$(git log -n 1  --pretty="%H")
+
+    echo "Reset the branch: $NEW_COMMIT"
+    git switch -q -
+    git reset --hard $NEW_COMMIT
+}
+
 function new_version () {
     echo "v$((${CURRENT_VERSION:1}+1))"
 }
@@ -120,7 +146,9 @@ $0: (list|ver|ex-cover|....)
     diff        compare the current patchset with the previous one.
     init	initialize the current working directory with a patch-dir.
     fix		fix a patch with the changes in the working directory.
+    fix-cont    continue the failed previous fix.
     lsfix|ls	list commits in the working directory.
+    replace     replace a pattern in the patchset.
 EOF
 }
 
@@ -319,6 +347,15 @@ case "$COMMAND" in
     lsfix|ls)
 	git log --oneline "@{upstream}.."|tac|cat -n|tac
 	;;
+    replace)
+        W1="$2"
+        W2="$3"
+        if [ -z "$W1" ] || [ -z "$W2" ]; then
+            echo "Usage: $0 replace <word1> <word2>"
+            exit 1
+        fi
+        replace_pattern "$W1" "$W2"
+        ;;
     *)
 	show_help
 	;;
